@@ -14,17 +14,13 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 async function run(){
     try{
         const usersCollection = client.db('mobileBikriKorai').collection('usersCollection');
+        const mobileCollection = client.db('mobileBikriKorai').collection('mobileCollection');
 
-        // app.post('/users',async(req,res)=>{
-        //     const userData = req.body;
-        //     const filter = {email: userData?.email};
-        //     const oldUser = await usersCollection.findOne(filter);
-        //     if(!oldUser){
-        //         const result = await usersCollection.insertOne(userData);
-        //         res.send(result);
-        //     }
-        // })
-
+        app.get('/mobiles',async(req,res)=>{
+          const query = {};
+          const mobiles = await mobileCollection.find(query).toArray();
+          res.send(mobiles);
+        })
         app.post('/users', async (req, res) => {
             try {
               const userData = req.body;
@@ -41,6 +37,22 @@ async function run(){
               res.status(500).json({ message: 'Internal server error' });
             }
           });
+
+          app.post('products', async (req,res) =>{
+            try{
+              const products = req.body;
+              const result = await mobileCollection.insertOne(products);
+              res.send(result);
+            }catch(error){
+              res.status(500).json({message: 'Internal server error'});
+            }
+          })
+          
+          app.get('users',async(req,res) =>{
+            const query = {};
+            const users = await usersCollection.find(query).toArray();
+            res.send(users);
+          })
     }finally{
     }
 }
