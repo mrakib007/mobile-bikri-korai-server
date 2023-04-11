@@ -1,3 +1,6 @@
+// require('crypto').randomBytes(64).toString('hex')
+//This line is for issuing a token
+
 const express = require('express');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
@@ -15,7 +18,7 @@ async function run(){
     try{
         const usersCollection = client.db('mobileBikriKorai').collection('usersCollection');
         const mobileCollection = client.db('mobileBikriKorai').collection('mobileCollection');
-
+        const productCollection = client.db('mobileBikriKorai').collection('productCollection');
         app.get('/mobiles',async(req,res)=>{
           const query = {};
           const mobiles = await mobileCollection.find(query).toArray();
@@ -38,10 +41,10 @@ async function run(){
             }
           });
 
-          app.post('products', async (req,res) =>{
+          app.post('/products', async (req,res) =>{
             try{
               const products = req.body;
-              const result = await mobileCollection.insertOne(products);
+              const result = await productCollection.insertOne(products);
               res.send(result);
             }catch(error){
               res.status(500).json({message: 'Internal server error'});
