@@ -48,7 +48,7 @@ async function run(){
             res.status(500).json({message:'Internal Server Error'});
           }
         })
-        
+
         app.post('/users', async (req, res) => {
             try {
               const userData = req.body;
@@ -80,6 +80,23 @@ async function run(){
             const query = {};
             const users = await usersCollection.find(query).toArray();
             res.send(users);
+          })
+
+          //get products
+          app.get('/myProducts',async(req,res)=>{
+            try{
+              let query = {};
+              if(req.query.email){
+                query = {
+                  email: req.query.email
+                }
+              }
+              const cursor = productCollection.find(query);
+              const products = await cursor.toArray();
+              res.send(products);
+            }catch(error){
+              res.status(500).json({message:'Internal Server Error'});
+            }
           })
     }finally{
     }
