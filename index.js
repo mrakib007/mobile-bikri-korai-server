@@ -19,11 +19,36 @@ async function run(){
         const usersCollection = client.db('mobileBikriKorai').collection('usersCollection');
         const mobileCollection = client.db('mobileBikriKorai').collection('mobileCollection');
         const productCollection = client.db('mobileBikriKorai').collection('productCollection');
+        const bookingsCollection = client.db('mobileBikriKorai').collection('bookingsCollection');
+        const paymentsCollection = client.db('mobileBikriKorai').collection('paymentsCollection');
+
         app.get('/mobiles',async(req,res)=>{
           const query = {};
           const mobiles = await mobileCollection.find(query).toArray();
           res.send(mobiles);
         })
+
+        app.get('/products',async (req,res)=>{
+          try{
+            const query = {};
+            const mobiles = await productCollection.find(query).toArray();
+            res.send(mobiles);
+          }catch(error){
+            console.log(error);
+            res.status(500).json({message:'Internal Server Error'});
+          }
+        })
+
+        app.get('/mobiles/:id',async(req,res)=>{
+          try{
+            const id = req.params.id;
+            const filterProducts = await productCollection.find({id: id}).toArray();
+            res.send(filterProducts);
+          }catch(error){
+            res.status(500).json({message:'Internal Server Error'});
+          }
+        })
+        
         app.post('/users', async (req, res) => {
             try {
               const userData = req.body;
