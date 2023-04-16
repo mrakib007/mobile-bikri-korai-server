@@ -14,6 +14,21 @@ const port = process.env.PORT || 5000;
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.vbw8r.mongodb.net/?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 
+function verifyJWT(req,res,next){
+  const authHeader = req.headers.authorization;
+  if(!authHeader){
+    return res.status(401).send('unauthorized access');
+  }
+  const token = authHeader.split(' ')[1];
+  jwt.verify(token,process.env.ACCESS_TOKEN,function(error,decoded){
+    if(err){
+      return res.status(403).send({message: 'forbidden access'})
+    }
+    req.decoded = decoded;
+    next();
+  })
+}
+
 async function run(){
     try{
         const usersCollection = client.db('mobileBikriKorai').collection('usersCollection');
@@ -47,6 +62,18 @@ async function run(){
           }catch(error){
             res.status(500).json({message:'Internal Server Error'});
           }
+        })
+
+        //get bookings
+        app.get('/bookings',verifyJWT,async(req,res)=>{
+          const email = req.query.email;
+          const decodedEmail = req.decoded.email;
+          if(email !== decodedEmail){
+            return res.status(403).send({message: 'forbidden access'});
+          }
+          const query = {email: email};
+          const bookings = await bookingsCollection.find(query).toArray();
+          res.send(bookings);
         })
 
         app.post('/users', async (req, res) => {
