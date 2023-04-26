@@ -54,10 +54,19 @@ async function run(){
           }
         })
 
+        // app.get('/mobiles/:id',async(req,res)=>{
+        //   try{
+        //     const id = req.params._id;
+        //     const filterProducts = await productCollection.find({id: id}).toArray();
+        //     res.send(filterProducts);
+        //   }catch(error){
+        //     res.status(500).json({message:'Internal Server Error'});
+        //   }
+        // })
         app.get('/mobiles/:id',async(req,res)=>{
           try{
             const id = req.params.id;
-            const filterProducts = await productCollection.find({id: id}).toArray();
+            const filterProducts = await productCollection.find({ id: id }).toArray();
             res.send(filterProducts);
           }catch(error){
             res.status(500).json({message:'Internal Server Error'});
@@ -92,6 +101,23 @@ async function run(){
               res.status(500).json({ message: 'Internal server error' });
             }
           });
+
+          //Get product
+          app.get('/myProducts',async(req,res)=>{
+            try{
+              let query = {};
+              if(req,query,email){
+                query = {
+                  email: req.query.email
+                }
+              }
+              const cursor = productCollection.find(query);
+              const products = await cursor.toArray();
+              res.send(products);
+            }catch(error){
+              res.status(500).json({message: 'Internal server error'});
+            }
+          })
 
           app.post('/products', async (req,res) =>{
             try{
