@@ -106,7 +106,7 @@ async function run(){
           app.get('/myProducts',async(req,res)=>{
             try{
               let query = {};
-              if(req,query,email){
+              if(req.query.email){
                 query = {
                   email: req.query.email
                 }
@@ -117,6 +117,19 @@ async function run(){
             }catch(error){
               res.status(500).json({message: 'Internal server error'});
             }
+          })
+
+          app.patch('/myProducts/:id',async(req,res)=>{
+            const id = req.params.id;
+            const status = req.body.status;
+            const query = {_id: new ObjectId(id)};
+            const updatedDoc = {
+              $set: {
+                status: status
+              }
+            }
+            const result = await productCollection.updateOne(query,updatedDoc);
+            res.send(result);
           })
 
           app.post('/products', async (req,res) =>{
@@ -135,7 +148,7 @@ async function run(){
             res.send(users);
           })
 
-          app.get('users/admin/:email',async(req,res)=>{
+          app.get('/users/admin/:email',async(req,res)=>{
             try{
               const email = req.params.email;
               const query = {email};
@@ -162,7 +175,7 @@ async function run(){
               const email = req.params.email;
               const query = {email};
               const user = await usersCollection.findOne(query);
-              res.send({isSeller: user?.role === 'buyer'});
+              res.send({isBuyer: user?.role === 'buyer'});
             }catch(error){
               res.status(500).json({message: 'Something went wrong'})
             }
@@ -170,14 +183,14 @@ async function run(){
 
           app.delete('/products/:id',async(req,res)=>{
             const id = req.params.id;
-            const query = {_id: ObjectId(id)};
+            const query = {_id: new ObjectId(id)};
             const result = await productCollection.deleteOne(query);
             res.send(result);
           })
 
           app.delete('/users/:id',async(req,res)=>{
             const id = req.params.id;
-            const filter = {_id: ObjectId(id)};
+            const filter = {_id: new ObjectId(id)};
             const result = await usersCollection.deleteOne(filter);
             res.send(result);
           })
