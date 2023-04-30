@@ -5,7 +5,7 @@ const express = require('express');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -129,10 +129,57 @@ async function run(){
             }
           })
           
-          app.get('users',async(req,res) =>{
+          app.get('/users',async(req,res) =>{
             const query = {};
             const users = await usersCollection.find(query).toArray();
             res.send(users);
+          })
+
+          app.get('users/admin/:email',async(req,res)=>{
+            try{
+              const email = req.params.email;
+              const query = {email};
+              const user = await usersCollection.findOne(query);
+              res.send({isAdmin: user?.role === 'admin'});
+            }catch(error){
+              res.status(500).json({message: 'Internal Server Error'});
+            }
+          })
+
+          app.get('/users/seller/:email',async(req,res)=>{
+            try{
+              const email = req.params.email;
+              const query = {email};
+              const user = await usersCollection.findOne(query);
+              res.send({isSeller: user?.role === 'seller'});
+            }catch(error){
+              res.status(500).json({message: 'Something went wrong'})
+            }
+          })
+
+          app.get('/users/buyer/:email',async(req,res)=>{
+            try{
+              const email = req.params.email;
+              const query = {email};
+              const user = await usersCollection.findOne(query);
+              res.send({isSeller: user?.role === 'buyer'});
+            }catch(error){
+              res.status(500).json({message: 'Something went wrong'})
+            }
+          })
+
+          app.delete('/products/:id',async(req,res)=>{
+            const id = req.params.id;
+            const query = {_id: ObjectId(id)};
+            const result = await productCollection.deleteOne(query);
+            res.send(result);
+          })
+
+          app.delete('/users/:id',async(req,res)=>{
+            const id = req.params.id;
+            const filter = {_id: ObjectId(id)};
+            const result = await usersCollection.deleteOne(filter);
+            res.send(result);
           })
 
           //get products
