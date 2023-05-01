@@ -195,6 +195,13 @@ async function run(){
             res.send(result);
           })
 
+          //book a product
+          app.post('/bookings',async(req,res)=>{
+            const booking = req.body;
+            const result = await bookingsCollection.insertOne(booking);
+            res.send(result);
+          })
+
           //get products
           app.get('/myProducts',async(req,res)=>{
             try{
