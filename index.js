@@ -202,6 +202,13 @@ async function run(){
             res.send(result);
           })
 
+          app.get('/bookings/:id',async(req,res)=>{
+            const id = req.params.id;
+            const query = {_id: new ObjectId(id)};
+            const booking = await bookingsCollection.findOne(query);
+            res.send(booking);
+          })
+
           //get products
           app.get('/myProducts',async(req,res)=>{
             try{
