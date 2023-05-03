@@ -37,6 +37,17 @@ async function run(){
         const bookingsCollection = client.db('mobileBikriKorai').collection('bookingsCollection');
         const paymentsCollection = client.db('mobileBikriKorai').collection('paymentsCollection');
 
+        const verifyAdmin = async(req,res,next) =>{
+          req.decoded.email;
+          const decodedEmail = req.decoded.email;
+          const query = {email: decodedEmail};
+          const user = await usersCollection.findOne(query);
+
+          if(user?.role !== 'admin'){
+            return res.status(403).send({message: "forbidden access"})
+          }
+          next();
+        }
         app.get('/mobiles',async(req,res)=>{
           const query = {};
           const mobiles = await mobileCollection.find(query).toArray();
@@ -173,6 +184,17 @@ async function run(){
               res.status(500).json({message: 'Internal server error'});
             }
           })
+
+          app.get('/jwt',async(req,res)=>{
+            const email = req.query.email;
+            const query = {email: email};
+            const user = await usersCollection.findOne(query);
+            if(user){
+              const token = jwt.sign({email},process.env.ACCESS_TOKEN,{expiresIn:'23h'});
+              return res.send({accessToken: token});
+            }
+            res.status(403).send({accessToken: ''})
+          })
           
           app.get('/users',async(req,res) =>{
             const query = {};
@@ -200,6 +222,19 @@ async function run(){
             }catch(error){
               res.status(500).json({message: 'Something went wrong'})
             }
+          })
+
+          app.put('/users/admin/:id',verifyJWT,verifyAdmin,async(req,res)=>{
+            const id = req.params.id;
+            const filter = {_id: new ObjectId(id)};
+            const options = {upsert: true};
+            const updatedDoc = {
+              $set: {
+                role: 'admin',
+              }
+            }
+            const result = await usersCollection.updateOne(filter,updatedDoc,options);
+            res.send(result);
           })
 
           app.get('/users/buyer/:email',async(req,res)=>{
